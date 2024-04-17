@@ -1,12 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('github-form');
+    
     form.addEventListener('submit', handleSubmit);
   });
   
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const searchTerm = document.getElementById('search').value;
-    searchUsers(searchTerm);
+    await searchUsers(searchTerm);
   }
   
   async function searchUsers(username) {
@@ -23,22 +24,33 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   
       data.items.forEach(user => {
-        const listItem = document.createElement('li');
-        listItem.innerHTML = `
-          <img src="${user.avatar_url}" alt="${user.login}" width="50">
-          <a href="#" data-username="${user.login}">${user.login}</a>
-        `;
-        userList.appendChild(listItem);
+        const userName = document.createElement('h2');
+        const avatar = document.createElement('img');
+        const link = document.createElement('a');
+  
+        userName.textContent = user.login;
+        avatar.src = user.avatar_url;
+        link.href = user.html_url;
+        link.textContent = 'View Profile';
+        link.dataset.username = user.login; // Add data-username attribute
+  
+        const userContainer = document.createElement('li');
+        userContainer.appendChild(userName);
+        userContainer.appendChild(avatar);
+        userContainer.appendChild(link);
+  
+        userList.appendChild(userContainer);
       });
   
-      userList.addEventListener('click', handleUserClick);
+      // Add event listener to the userList for event delegation
+      userList.addEventListener('click', showRepositories);
     } catch (error) {
       console.error('Error searching users:', error);
       userList.innerHTML = '<li>Failed to fetch users</li>';
     }
   }
   
-  async function handleUserClick(event) {
+  async function showRepositories(event) {
     event.preventDefault();
     if (event.target.tagName === 'A') {
       const username = event.target.dataset.username;
@@ -55,11 +67,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
   
         repos.forEach(repo => {
-          const listItem = document.createElement('li');
-          listItem.innerHTML = `
-            <a href="${repo.html_url}" target="_blank">${repo.name}</a>
-          `;
-          reposList.appendChild(listItem);
+          const repoName = document.createElement('h2');
+          const repoLink = document.createElement('a');
+  
+          repoName.textContent = repo.name;
+          repoLink.href = repo.html_url;
+          repoLink.textContent = 'View Repository';
+  
+          const repoContainer = document.createElement('li');
+          repoContainer.appendChild(repoName);
+          repoContainer.appendChild(repoLink);
+          reposList.appendChild(repoContainer);
         });
       } catch (error) {
         console.error('Error fetching repositories:', error);
